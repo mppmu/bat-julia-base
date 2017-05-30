@@ -63,7 +63,7 @@ RUN true \
         libX11-devel libXext-devel libXft-devel libXpm-devel \
         libjpeg-devel libpng-devel \
         mesa-libGLU-devel \
-    && provisioning/install-sw.sh root 6.06.08 /opt/root
+    && provisioning/install-sw.sh root 6.08.06 /opt/root
 
 
 # Install Anaconda2:
@@ -72,7 +72,10 @@ COPY provisioning/install-sw-scripts/anaconda2-* provisioning/install-sw-scripts
 
 ENV \
     PATH="/opt/anaconda2/bin:$PATH" \
-    MANPATH="/opt/anaconda2/share/man:$MANPATH"
+    MANPATH="/opt/anaconda2/share/man:$MANPATH" \
+    JUPYTER=jupyter
+
+    # JUPYTER environment variable used by IJulia to detect Jupyter installation
 
 RUN true \
     && yum install -y \
@@ -102,10 +105,9 @@ ENV \
 RUN true \
     && yum install -y \
         libedit-devel ncurses-devel openssl openssl-devel \
-        hdf5-devel ImageMagick zeromq-devel gtk2 gtk3 \
+        ImageMagick zeromq-devel gtk2 gtk3 \
     && provisioning/install-sw.sh julia 0.5.1 /opt/julia \
-    && provisioning/install-sw.sh julia-cxx oschulz/julia0.5-root /opt/julia/share/julia/site \
-    && provisioning/install-sw.sh julia-rjulia jpata/cxx /opt/julia
+    && provisioning/install-sw.sh julia-cxx oschulz/julia0.5-root /opt/julia/share/julia/site
 
 
 # Install BAT:
@@ -122,12 +124,32 @@ RUN true \
     && provisioning/install-sw.sh bat bat/master /opt/bat
 
 
+# Install HDF5:
+
+COPY provisioning/install-sw-scripts/hdf5-* provisioning/install-sw-scripts/
+
+ENV \
+    PATH="/opt/hdf5/bin:$PATH" \
+    LD_LIBRARY_PATH="/opt/hdf5/lib:$LD_LIBRARY_PATH"
+
+RUN provisioning/install-sw.sh hdf5 1.10.0-patch1 /opt/hdf5
+
+
+# Install HDFView:
+
+COPY provisioning/install-sw-scripts/hdfview-* provisioning/install-sw-scripts/
+
+ENV PATH="/opt/hdfview/bin:$PATH"
+
+RUN provisioning/install-sw.sh hdfview 2.13.0 /opt/hdfview
+
+
 # Install GitHub Atom:
 
 RUN yum install -y \
         lsb-core-noarch libXScrnSaver libXss.so.1 gtk3 libXtst libxkbfile GConf2 alsa-lib \
         levien-inconsolata-fonts dejavu-sans-fonts \
-    && rpm -ihv https://github.com/atom/atom/releases/download/v1.15.0/atom.x86_64.rpm
+    && rpm -ihv https://github.com/atom/atom/releases/download/v1.17.2/atom.x86_64.rpm
 
 
 # Install additional packages and clean up:
