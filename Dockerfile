@@ -43,6 +43,30 @@ ENV \
 RUN provisioning/install-sw.sh cmake 3.5.1 /opt/cmake
 
 
+# Install Julia:
+
+COPY provisioning/install-sw-scripts/julia-* provisioning/install-sw-scripts/
+
+ENV \
+    PATH="/opt/julia/usr/bin:$PATH" \
+    MANPATH="/opt/julia/usr/share/man:$MANPATH"
+
+RUN true\
+    && yum install -y \
+        libedit-devel ncurses-devel openssl openssl-devel symlinks \
+    && MARCH=x86-64 provisioning/install-sw.sh julia-srcbuild JuliaLang/v0.5.2 /opt/julia
+
+
+# Install depencencies of common Julia packages:
+
+ENV \
+    JULIA_CXX_RTTI="1"
+
+RUN true \
+    && yum install -y \
+        ImageMagick zeromq-devel gtk2 gtk3
+
+
 # Install CERN ROOT:
 
 COPY provisioning/install-sw-scripts/root-* provisioning/install-sw-scripts/
@@ -91,25 +115,6 @@ RUN true \
 EXPOSE 8888
 
 
-# Install Julia:
-
-COPY provisioning/install-sw-scripts/julia-* provisioning/install-sw-scripts/
-
-ENV \
-    PATH="/opt/julia/bin:$PATH" \
-    LD_LIBRARY_PATH="/opt/julia/lib:$LD_LIBRARY_PATH" \
-    MANPATH="/opt/julia/share/man:$MANPATH" \
-    JULIA_HOME="/opt/julia/bin" \
-    JULIA_CXX_RTTI="1"
-
-RUN true \
-    && yum install -y \
-        libedit-devel ncurses-devel openssl openssl-devel \
-        ImageMagick zeromq-devel gtk2 gtk3 \
-    && provisioning/install-sw.sh julia 0.5.1 /opt/julia \
-    && provisioning/install-sw.sh julia-cxx oschulz/julia0.5-root /opt/julia/share/julia/site
-
-
 # Install BAT:
 
 COPY provisioning/install-sw-scripts/bat-* provisioning/install-sw-scripts/
@@ -122,6 +127,12 @@ ENV \
 
 RUN true \
     && provisioning/install-sw.sh bat bat/master /opt/bat
+
+
+# Install Java:
+
+RUN yum install -y \
+        java-1.8.0-openjdk-devel
 
 
 # Install HDF5:
