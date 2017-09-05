@@ -54,7 +54,7 @@ ENV \
 RUN true\
     && yum install -y \
         libedit-devel ncurses-devel openssl openssl-devel symlinks \
-    && MARCH=x86-64 provisioning/install-sw.sh julia-srcbuild JuliaLang/v0.5.2 /opt/julia
+    && MARCH=core-avx2 provisioning/install-sw.sh julia-srcbuild JuliaLang/v0.6.0 /opt/julia
 
 
 # Install depencencies of common Julia packages:
@@ -87,7 +87,7 @@ RUN true \
         libX11-devel libXext-devel libXft-devel libXpm-devel \
         libjpeg-devel libpng-devel \
         mesa-libGLU-devel \
-    && provisioning/install-sw.sh root 6.08.06 /opt/root
+    && provisioning/install-sw.sh root 6.10.02 /opt/root
 
 
 # Install Anaconda2:
@@ -104,7 +104,7 @@ ENV \
 RUN true \
     && yum install -y \
         libXdmcp \
-        texlive-collection-latexrecommended texlive-adjustbox texlive-upquote texlive-ulem \
+        texlive-collection-latexrecommended texlive-dvipng texlive-adjustbox texlive-upquote texlive-ulem \
     && provisioning/install-sw.sh anaconda2 4.4.0 /opt/anaconda2 \
     && conda install -c conda-forge nbpresent pandoc \
     && conda install -c anaconda-nb-extensions nbbrowserpdf \
@@ -143,16 +143,7 @@ ENV \
     PATH="/opt/hdf5/bin:$PATH" \
     LD_LIBRARY_PATH="/opt/hdf5/lib:$LD_LIBRARY_PATH"
 
-RUN provisioning/install-sw.sh hdf5 1.10.0-patch1 /opt/hdf5
-
-
-# Install HDFView:
-
-COPY provisioning/install-sw-scripts/hdfview-* provisioning/install-sw-scripts/
-
-ENV PATH="/opt/hdfview/bin:$PATH"
-
-RUN provisioning/install-sw.sh hdfview 2.13.0 /opt/hdfview
+RUN provisioning/install-sw.sh hdf5-srcbuild 1.10.0-patch1 /opt/hdf5
 
 
 # Install GitHub Atom:
@@ -171,6 +162,7 @@ RUN yum install -y \
         graphviz-devel \
         \
         xorg-x11-server-utils mesa-dri-drivers glx-utils \
+        xdg-utils \
         \
         http://linuxsoft.cern.ch/cern/centos/7/cern/x86_64/Packages/parallel-20150522-1.el7.cern.noarch.rpm \
     && yum clean all
